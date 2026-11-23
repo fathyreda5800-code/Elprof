@@ -17,16 +17,18 @@ const firstSummaryQuestion = {
   options: ['', '', '', ''],
   correct: 0,
   explanation: '',
+  imageUrl: `${import.meta.env.BASE_URL}zobda-questions/question-01.jpg`,
   streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL
 }
 
 const quantQuestions: QuestionItem[] = [
   firstSummaryQuestion,
-  ...Array.from({ length: 54 }, (): QuestionItem => ({
+  ...Array.from({ length: 54 }, (_, questionIndex): QuestionItem => ({
     text: '',
     options: ['', '', '', ''],
     correct: 0,
-    explanation: ''
+    explanation: '',
+    imageUrl: `${import.meta.env.BASE_URL}zobda-questions/question-${String(questionIndex + 2).padStart(2, '0')}.jpg`
   }))
 ]
 
@@ -738,9 +740,11 @@ function Exam() {
   }, [id])
 
   const activeModel = remoteModel || model
-  const sourceQuestions: QuestionItem[] = remoteQuestions.length
-    ? remoteQuestions
-    : model.questionItems?.length ? model.questionItems : questionBanks[model.id] || quantQuestions
+  const sourceQuestions: QuestionItem[] = model.id === 1
+    ? quantQuestions
+    : remoteQuestions.length
+      ? remoteQuestions
+      : model.questionItems?.length ? model.questionItems : questionBanks[model.id] || quantQuestions
   const examQuestions: QuestionItem[] = Array.from({ length: 55 }, (_, questionIndex) => {
     const sourceQuestion = sourceQuestions[questionIndex]
     if (sourceQuestion) return sourceQuestion
@@ -832,8 +836,7 @@ function Exam() {
         <button className={`review ${marked.includes(index) ? 'active' : ''}`} onClick={() => setMarked(v => v.includes(index) ? v.filter(x => x !== index) : [...v, index])}><Target size={17}/>{marked.includes(index) ? 'إزالة المراجعة' : 'وضع للمراجعة'}</button>
       </aside>
       <section className="question-card">
-        <div className="question-card-head"><span className="q-label">السؤال {index + 1}</span></div>
-        <div className={`question-prompt-layout ${currentQuestion.imageUrl ? 'has-diagram' : ''}`}>
+        <div className={`question-prompt-layout ${currentQuestion.imageUrl ? (currentQuestion.text ? 'has-diagram' : 'has-diagram-only') : ''}`}>
           <h1>{currentQuestion.text}</h1>
           {currentQuestion.imageUrl && <div className="question-diagram-wrap"><img className="question-diagram" src={currentQuestion.imageUrl} alt="رسم المثلث المظلل والمثلثين غير المظللين"/></div>}
         </div>
