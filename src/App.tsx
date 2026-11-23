@@ -7,28 +7,21 @@ import './App.css'
 type QuestionItem = { text: string; options: string[]; correct: number; explanation: string; imageUrl?: string; videoUrl?: string; streamableEmbedUrl?: string }
 
 const STREAMABLE_FIRST_QUESTION_URL = 'https://streamable.com/e/t3fsna?autoplay=1&loop=0'
+const SUMMARY_ANSWER_KEYS = ['ا', 'ب', 'ج', 'ج', 'ب', 'ب', 'ج', 'ب', 'ج', 'ب', 'ا', 'ب', 'ب', 'د', 'د', 'ا', 'د', 'ب', 'ج', 'د', 'ج', 'ب', 'د', 'ا', 'ب', 'د', 'د', 'د', 'د', 'ب', 'ج', 'ب', 'ا', 'د', 'ج', 'د', 'ا', 'ج', 'ج', 'ب', 'ب', 'ج', 'د', 'ا', 'ا', 'ا', 'ج', 'ب', 'ا', 'د', 'ج', 'ج', 'ب', 'ب', 'ج']
+const SUMMARY_CORRECT_INDEXES = SUMMARY_ANSWER_KEYS.map(answer => ['ا', 'ب', 'ج', 'د'].indexOf(answer))
 
 const models = [
   { id: 1, title: 'الزبدة', subject: 'القدرات العامة والتحصيلي', questions: 55, duration: 25, description: 'تدريب شامل على أهم المهارات.' }
 ]
 
-const firstSummaryQuestion = {
-  text: '',
-  options: ['', '', '', ''],
-  correct: 0,
-  explanation: '',
-  imageUrl: `${import.meta.env.BASE_URL}zobda-questions/question-01.jpg`,
-  streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL
-}
-
 const quantQuestions: QuestionItem[] = [
-  firstSummaryQuestion,
-  ...Array.from({ length: 54 }, (_, questionIndex): QuestionItem => ({
+  ...Array.from({ length: 55 }, (_, questionIndex): QuestionItem => ({
     text: '',
     options: ['', '', '', ''],
-    correct: 0,
+    correct: SUMMARY_CORRECT_INDEXES[questionIndex],
     explanation: '',
-    imageUrl: `${import.meta.env.BASE_URL}zobda-questions/question-${String(questionIndex + 2).padStart(2, '0')}.jpg`
+    imageUrl: `${import.meta.env.BASE_URL}zobda-questions/question-${String(questionIndex + 1).padStart(2, '0')}.jpg`,
+    ...(questionIndex === 0 ? { streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL } : {})
   }))
 ]
 
@@ -733,7 +726,7 @@ function Exam() {
             options: row.options,
             correct: row.correct_index,
             explanation: row.explanation,
-            ...(data.id === 1 && questionIndex === 0 ? firstSummaryQuestion : {})
+            ...(data.id === 1 ? quantQuestions[questionIndex] || {} : {})
           })))
         }
       })
