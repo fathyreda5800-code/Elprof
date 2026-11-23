@@ -10,15 +10,11 @@ const models = [
   { id: 1, title: 'الزبدة', subject: 'القدرات العامة والتحصيلي', questions: 55, duration: 25, description: 'تدريب شامل على أهم المهارات.' }
 ]
 
-const STREAMABLE_FIRST_QUESTION_URL = 'https://streamable.com/e/t3fsna?autoplay=1&loop=0'
-
 const firstSummaryQuestion = {
   text: '',
   options: ['', '', '', ''],
   correct: 0,
-  explanation: '',
-  imageUrl: `${import.meta.env.BASE_URL}zobda-question-1.png`,
-  streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL
+  explanation: ''
 }
 
 const quantQuestions: QuestionItem[] = [
