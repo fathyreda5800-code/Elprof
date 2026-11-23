@@ -6,6 +6,8 @@ import './App.css'
 
 type QuestionItem = { text: string; options: string[]; correct: number; explanation: string; imageUrl?: string; videoUrl?: string; streamableEmbedUrl?: string }
 
+const STREAMABLE_FIRST_QUESTION_URL = 'https://streamable.com/e/t3fsna?autoplay=1&loop=0'
+
 const models = [
   { id: 1, title: 'الزبدة', subject: 'القدرات العامة والتحصيلي', questions: 55, duration: 25, description: 'تدريب شامل على أهم المهارات.' }
 ]
@@ -14,7 +16,8 @@ const firstSummaryQuestion = {
   text: '',
   options: ['', '', '', ''],
   correct: 0,
-  explanation: ''
+  explanation: '',
+  streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL
 }
 
 const quantQuestions: QuestionItem[] = [
