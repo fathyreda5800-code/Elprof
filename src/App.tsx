@@ -14,7 +14,7 @@ const STREAMABLE_FIRST_QUESTION_URL = 'https://streamable.com/e/t3fsna?autoplay=
 
 const firstSummaryQuestion = {
   text: '',
-  options: ['القيمة الأولى أكبر', 'القيمة الثانية أكبر', 'القيمتان متساويتان', 'المعطيات غير كافية'],
+  options: ['', '', '', ''],
   correct: 0,
   explanation: '',
   imageUrl: `${import.meta.env.BASE_URL}zobda-question-1.png`,
@@ -838,7 +838,7 @@ function Exam() {
           <h1>{currentQuestion.text}</h1>
           {currentQuestion.imageUrl && <div className="question-diagram-wrap"><img className="question-diagram" src={currentQuestion.imageUrl} alt="رسم المثلث المظلل والمثلثين غير المظللين"/></div>}
         </div>
-        <div className="options">{currentQuestion.options.map((op, i) => <button key={op} className={answers[index] === i ? 'selected' : ''} onClick={() => setAnswers(a => a.map((v, n) => n === index ? i : v))}><b>{['أ', 'ب', 'ج', 'د'][i]}</b><span>{op}</span><i><CircleCheck size={17}/></i></button>)}</div>
+        <div className="options">{currentQuestion.options.map((op, i) => <button key={i} className={answers[index] === i ? 'selected' : ''} onClick={() => setAnswers(a => a.map((v, n) => n === index ? i : v))}><b>{['أ', 'ب', 'ج', 'د'][i]}</b><span>{op}</span><i><CircleCheck size={17}/></i></button>)}</div>
         <div className="q-actions">
           <button disabled={index === 0} onClick={() => setIndex(index - 1)}><ChevronRight/>السابق</button>
           <button className="skip" onClick={() => index < examQuestions.length - 1 && setIndex(index + 1)}>تخطي السؤال</button>
