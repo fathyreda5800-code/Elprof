@@ -960,11 +960,11 @@ function Review() {
         {reviewQuestions.map((question, index) => {
           const selected = reviewAnswers[index]
           const isCorrect = selected === question.correct
-          return <article className="review-card" key={question.text}>
+          return <article className="review-card" key={`${question.imageUrl}-${index}`}>
             <div className="review-status"><span>السؤال {index + 1}</span><b className={isCorrect ? 'correct' : 'wrong'}>{isCorrect ? 'إجابة صحيحة' : 'إجابة خاطئة'}</b></div>
             <h2>{question.text}</h2>
-            <p><b>إجابتك: </b>{selected === null ? 'لم تتم الإجابة' : question.options[selected]}</p>
-            <p><b>الإجابة الصحيحة: </b>{question.options[question.correct]}</p>
+            <p><b>إجابتك: </b>{selected === null ? 'لم تتم الإجابة' : ['أ', 'ب', 'ج', 'د'][selected]}</p>
+            <p><b>الإجابة الصحيحة: </b>{['أ', 'ب', 'ج', 'د'][question.correct]}</p>
           </article>
         })}
       </div>
