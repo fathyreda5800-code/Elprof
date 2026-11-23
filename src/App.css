@@ -2024,11 +2024,22 @@
 }
 
 .exam-page {
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   background: #f4f5f8;
   color: #242731;
   direction: rtl;
   padding-bottom: 30px;
+  overflow-x: hidden;
+}
+
+#root:has(.exam-page) {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border-inline: 0;
+  overflow-x: hidden;
 }
 
 .exam-top {
@@ -2582,6 +2593,19 @@
 }
 
 @media (max-width: 560px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .exam-page {
+    width: 100vw;
+    min-width: 0;
+  }
+
   .video-modal-backdrop {
     padding: 12px;
   }

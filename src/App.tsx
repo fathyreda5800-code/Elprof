@@ -4,25 +4,31 @@ import { BarChart3, BookOpen, Bookmark, ChevronLeft, ChevronRight, CircleCheck, 
 import { supabase } from './lib/supabase'
 import './App.css'
 
+type QuestionItem = { text: string; options: string[]; correct: number; explanation: string; imageUrl?: string; videoUrl?: string; streamableEmbedUrl?: string }
+
 const models = [
-  { id: 1, title: 'زبدة رقم 1', subject: 'القدرات العامة والتحصيلي', questions: 3, duration: 25, description: 'تدريب شامل على أهم المهارات.' }
+  { id: 1, title: 'الزبدة', subject: 'القدرات العامة والتحصيلي', questions: 55, duration: 25, description: 'تدريب شامل على أهم المهارات.' }
 ]
 
 const STREAMABLE_FIRST_QUESTION_URL = 'https://streamable.com/e/t3fsna?autoplay=1&loop=0'
 
 const firstSummaryQuestion = {
-  text: 'قارن بين:\nالقيمة الأولى: مساحة المثلث المظلل.\nالقيمة الثانية: مجموع مساحتي المثلثين غير المظللين.',
+  text: '',
   options: ['القيمة الأولى أكبر', 'القيمة الثانية أكبر', 'القيمتان متساويتان', 'المعطيات غير كافية'],
   correct: 0,
-  explanation: 'الارتفاع واحد للمثلثات الثلاثة، وقاعدة المثلث المظلل أطول من مجموع قاعدتي المثلثين غير المظللَين.',
+  explanation: '',
   imageUrl: `${import.meta.env.BASE_URL}zobda-question-1.png`,
   streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL
 }
 
-const quantQuestions = [
+const quantQuestions: QuestionItem[] = [
   firstSummaryQuestion,
-  { text: 'أيٌّ مما يلي يمثل العدد التالي في النمط: 3، 6، 12، 24، …؟', options: ['36', '42', '48', '54'], correct: 2, explanation: 'كل عدد يساوي ضعف العدد السابق؛ إذن 24 × 2 = 48.' },
-  { text: 'إذا كان 3x + 5 = 20، فما قيمة x؟', options: ['3', '5', '6', '8'], correct: 1, explanation: 'نطرح 5 من الطرفين: 3x = 15، ثم نقسم على 3 فتكون x = 5.' }
+  ...Array.from({ length: 54 }, (): QuestionItem => ({
+    text: '',
+    options: ['', '', '', ''],
+    correct: 0,
+    explanation: ''
+  }))
 ]
 
 const questionBanks: Record<number, typeof quantQuestions> = {
@@ -32,7 +38,6 @@ const questionBanks: Record<number, typeof quantQuestions> = {
 const TEACHER_EMAIL = 'ahmed@gmail.com'
 const EMAIL_OTP_LENGTH = 6
 
-type QuestionItem = { text: string; options: string[]; correct: number; explanation: string; imageUrl?: string; videoUrl?: string; streamableEmbedUrl?: string }
 type Model = { id: number; title: string; subject: string; questions: number; duration: number; description: string; createdAt?: number; questionCount?: number; questionItems?: QuestionItem[]; videoUrl?: string }
 type StudentProfile = { id: string; full_name: string; email: string; phone: string; created_at: string }
 type TestItem = { number: string; subject: string; title: string }
@@ -650,7 +655,11 @@ function Summaries() {
       })
   }, [])
 
-  const allModels: Model[] = [...models, ...remoteModels, ...custom]
+  const allModels: Model[] = [
+    ...models,
+    ...remoteModels.filter(model => model.id !== 1),
+    ...custom.filter(model => model.id !== 1)
+  ]
 
   return <AppShell title="زبدة" >
     <main className="summaries-page-reset">
@@ -666,18 +675,18 @@ function Summaries() {
           <p>ملخصات تعليمية متاحة الآن</p>
         </div>
         <div className="summary-grid">
-          {allModels.filter(model => model.id !== 2).map((model, index) => <article className="summary-card" key={model.id}>
+          {allModels.filter(model => model.id !== 2).map(model => <article className="summary-card" key={model.id}>
             <div className="summary-card-head">
               <span>القدرات العامة والتحصيلي</span>
               <b>متاح الآن</b>
             </div>
-            <h2>{`زبدة رقم ${index + 1}`}</h2>
+            <h2>الزبدة</h2>
             <p>{model.description}</p>
             <div className="summary-card-info">
               <span><FileText size={17}/>{model.questionItems?.length ?? model.questionCount ?? model.questions} سؤال</span>
             </div>
             <button type="button" className="summary-start" onClick={() => navigate(`/exam/${model.id}`)}>
-              ابدأ زبدة <ChevronLeft size={18}/>
+              ابدأ الاختبار <ChevronLeft size={18}/>
             </button>
           </article>)}
         </div>
@@ -706,7 +715,7 @@ function Exam() {
         if (!data) return
         setRemoteModel({
           id: data.id,
-          title: data.title,
+          title: data.id === 1 ? 'الزبدة' : data.title,
           subject: data.subject,
           questions: data.question_count,
           duration: data.duration,
@@ -730,9 +739,19 @@ function Exam() {
   }, [id])
 
   const activeModel = remoteModel || model
-  const examQuestions: QuestionItem[] = remoteQuestions.length
+  const sourceQuestions: QuestionItem[] = remoteQuestions.length
     ? remoteQuestions
     : model.questionItems?.length ? model.questionItems : questionBanks[model.id] || quantQuestions
+  const examQuestions: QuestionItem[] = Array.from({ length: 55 }, (_, questionIndex) => {
+    const sourceQuestion = sourceQuestions[questionIndex]
+    if (sourceQuestion) return sourceQuestion
+    return {
+      text: '',
+      options: ['', '', '', ''],
+      correct: 0,
+      explanation: ''
+    }
+  })
   const [index, setIndex] = useState(0)
   const [answers, setAnswers] = useState<(number | null)[]>(examQuestions.map(() => null))
   const [marked, setMarked] = useState<number[]>([])
