@@ -7,7 +7,61 @@ import './App.css'
 type QuestionItem = { text: string; options: string[]; correct: number; explanation: string; imageUrl?: string; videoUrl?: string; streamableEmbedUrl?: string; googleDriveEmbedUrl?: string }
 
 const STREAMABLE_FIRST_QUESTION_URL = 'https://streamable.com/e/t3fsna?autoplay=1&loop=0'
-const QUESTION_2_DRIVE_EMBED_URL = 'https://drive.google.com/file/d/1707Mee8opmvlCsv6gdT6PGFB6bUTiBA8/preview'
+const MODEL_1_DRIVE_VIDEO_IDS: Record<number, string> = {
+  2: '1707Mee8opmvlCsv6gdT6PGFB6bUTiBA8',
+  3: '1aGuxZj6UsNQbXhIrsVsdQcgKGeBfQxUv',
+  4: '1E288JxqmM4hbw2RgI78kqqIMlLGzY4OR',
+  5: '19K91tIkbqUB6bessdAPbBQosuFw1QJlb',
+  6: '1nwzY2iJIytiCdCkX7vxDjq6z37RiK49y',
+  7: '1jeKr4x2a-c6H30B66x99dmWtFYT-Wryp',
+  8: '11bNvhFzRsbjK5NJlICBD7-ypX7690Qn1',
+  9: '1lLHZ1t4deqrYmp11fDqwDj_eFGbKY56F',
+  10: '1fqbmMMW2nwQcjeYd_NNw0s-jrIS4NkYz',
+  11: '10htTjcHAU1WuPUlEsLalMPxjxPJCcls0',
+  12: '1sM3M2e5xAOatLxjRWcARXkMegabWOr87',
+  13: '1epmAk0eIphT9L4ZsHFZdpuZA8cKcoHnx',
+  14: '1WykG3XF4hEtlAqqYimqNuN97ZorTd07x',
+  15: '1nriiE5CATecP7YHf6a0gkSaumAzjKE4j',
+  16: '1Hn9AWuyZsR7MqTZdP1kaHKzjh6ZiUFD9',
+  17: '1zFH3QLgck8HCCr3nmUOq87U6q_ob7KYP',
+  18: '1K_LWVzJCiNpXiU4choKxlP2jKbY6YT7E',
+  19: '16PmRujD2PWmuC9q899KL7ZI_EkqokfE-',
+  20: '1UvtIAYA1cUHLsZaWtRLjcFGSKE6kDFD2',
+  21: '1mwtmCpsG3tAMvrutUk6oAkZsX0dpuE6w',
+  22: '19RVf8EL0sFWd3RQnH8lrX2NY8nTKBZwW',
+  23: '1TIsvoi5rJpR3cWnC2BAkePpLVCixYUkl',
+  24: '1MBDf5_RaGQWzNTK8NuZMpLKSPRg2I7xq',
+  25: '1jLvQpVc4tsBadrorDjJr54GC6kwtyv9f',
+  26: '1nntYRh8N3tCqi0QmE6_telN5LJqF4nYa',
+  27: '1cylu_kKdgssEsjc0GhHc9tIML38cVxVn',
+  28: '12fTmDEFihlovi2y2NUNalkV8O-P0Ka0v',
+  29: '1UbfPzqzNenV98GMB0ZyBDbP1SAKiFtXi',
+  30: '1EGqeT06avNEyVOuGbpXecmePVA8-an6q',
+  31: '1S-cyVMvYsLFSOOcPlRFRVa7iZzUBQ1rO',
+  32: '1RWISdxZqZtQLEnn6LmB4q7Ef2P13tAXS',
+  33: '10xxHZdgMze_8yrXf8WVEv_jJQG1UblWb',
+  34: '1q_n1FSNS2ONBORew5iFlIabkifsA6X5D',
+  35: '18IwKddw-zRGnj0ZdrH_9BWR14OyKXJ-R',
+  36: '1oJ8z8tWjPKvRw-Qv3MWcbOG1w-pgdt3L',
+  37: '1zJt85A3G76wEwjJ5BcTPszWvoWJlP0rA',
+  38: '1gyze9ezcW3ozw76XTxN-lSr6avp6664D',
+  39: '12TUMOSKVn4eV9RpVimy5LzeVjbn8fctl',
+  40: '1YJd4quxVdGPGPa7w_Om-UfwfFNRcuvkI',
+  41: '1aDNJrlM1nEkdtD2UeWFV8d9EIrTtqQjz',
+  42: '1SgGqomUQpzyBzSrJ1_wbxTs1vVQLfN7o',
+  43: '1CU50Do0dxEGtdq6Eg8hTrSYYX9PfReMd',
+  44: '1NfG7hTuMwzLldbYS9OmDlCV7rPpoH_KZ',
+  45: '17bMopxO4GJSSLC-dHhQN9XyEmjNjkyAE',
+  46: '1TQYWTWN_vVPf7SmDyGjelQPsMwTef1G4',
+  47: '1yjIKfgqaNUsNZAMnJcZEynS30Be6LW9e',
+  48: '1K0MUq6nAg38SNXHYMYFt6zjyR6eV7yeV',
+  49: '1addA9z_XGkuuFPS0LUzlNfNy4ra7LU-3',
+  50: '1JoG_h10FViiwT8mu64rooe-W2ZQyYg-T',
+  52: '117fW7v-gRmt6P7vLS0ySvk8G6dCSTzZW',
+  53: '1ckLEpfYAejnSBeU7Qx5mT_oGPmUh-kpX',
+  54: '1M2QNycyBsXVy0g0uJqQ2kMdqM5xvbEJA',
+  55: '1zdlvESCy8oXagQzWy8hZXddY4vnwAS13'
+}
 const SUMMARY_ANSWER_KEYS = ['ا', 'ب', 'ج', 'ج', 'ب', 'ب', 'ج', 'ب', 'ج', 'ب', 'ا', 'ب', 'ب', 'د', 'د', 'ا', 'د', 'ب', 'ج', 'د', 'ج', 'ب', 'د', 'ا', 'ب', 'د', 'د', 'د', 'د', 'ب', 'ج', 'ب', 'ا', 'د', 'ج', 'د', 'د', 'ب', 'ج', 'ب', 'ب', 'ج', 'د', 'ا', 'ا', 'ا', 'ج', 'ب', 'ا', 'د', 'ج', 'ج', 'ب', 'ب', 'ج']
 const SUMMARY_CORRECT_INDEXES = SUMMARY_ANSWER_KEYS.map(answer => ['ا', 'ب', 'ج', 'د'].indexOf(answer))
 const MODEL_ANSWER_KEYS: Record<number, readonly string[]> = {
@@ -50,16 +104,19 @@ const models = [
 ]
 
 const quantQuestions: QuestionItem[] = [
-  ...Array.from({ length: 55 }, (_, questionIndex): QuestionItem => ({
-    text: '',
-    options: ['', '', '', ''],
-    correct: SUMMARY_CORRECT_INDEXES[questionIndex],
-    explanation: '',
-    imageUrl: `${import.meta.env.BASE_URL}zobda-questions/question-${String(questionIndex + 1).padStart(2, '0')}.jpg`,
-    ...(questionIndex === 0
-      ? { streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL }
-      : questionIndex === 1 ? { googleDriveEmbedUrl: QUESTION_2_DRIVE_EMBED_URL } : {})
-  }))
+  ...Array.from({ length: 55 }, (_, questionIndex): QuestionItem => {
+    const questionNumber = questionIndex + 1
+    const driveVideoId = MODEL_1_DRIVE_VIDEO_IDS[questionNumber]
+    return {
+      text: '',
+      options: ['', '', '', ''],
+      correct: SUMMARY_CORRECT_INDEXES[questionIndex],
+      explanation: '',
+      imageUrl: `${import.meta.env.BASE_URL}zobda-questions/question-${String(questionNumber).padStart(2, '0')}.jpg`,
+      ...(questionIndex === 0 ? { streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL } : {}),
+      ...(driveVideoId ? { googleDriveEmbedUrl: `https://drive.google.com/file/d/${driveVideoId}/preview` } : {})
+    }
+  })
 ]
 
 function createModelQuestions(modelId: number): QuestionItem[] {
