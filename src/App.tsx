@@ -9,9 +9,43 @@ type QuestionItem = { text: string; options: string[]; correct: number; explanat
 const STREAMABLE_FIRST_QUESTION_URL = 'https://streamable.com/e/t3fsna?autoplay=1&loop=0'
 const SUMMARY_ANSWER_KEYS = ['ا', 'ب', 'ج', 'ج', 'ب', 'ب', 'ج', 'ب', 'ج', 'ب', 'ا', 'ب', 'ب', 'د', 'د', 'ا', 'د', 'ب', 'ج', 'د', 'ج', 'ب', 'د', 'ا', 'ب', 'د', 'د', 'د', 'د', 'ب', 'ج', 'ب', 'ا', 'د', 'ج', 'د', 'د', 'ب', 'ج', 'ب', 'ب', 'ج', 'د', 'ا', 'ا', 'ا', 'ج', 'ب', 'ا', 'د', 'ج', 'ج', 'ب', 'ب', 'ج']
 const SUMMARY_CORRECT_INDEXES = SUMMARY_ANSWER_KEYS.map(answer => ['ا', 'ب', 'ج', 'د'].indexOf(answer))
+const MODEL_ANSWER_KEYS: Record<number, readonly string[]> = {
+  2: 'ج ب ب ب ب ج ب د د ب ب ج ا ا ب ج ج ب ج ب ج ا ج ا ا ا ج د ج ب د ا ا ب د ب ب ب ج ج ب ج ا ج ا د ج ب ج ا د ا د ا د'.split(' '),
+  3: 'د ج ج ا ج ا ج ب ب ب د ج ا ج ا ب د ج ا ا ج ب د ج د ج د ج ج ا ج ب ب ج ج ب ج ج ا د ج ب ب ج ا ب ج ب ج ج ب ج ب ا ا'.split(' '),
+  4: 'ج ا د ج ا ج ب ج ا ا د د ب ا ب د ب د د ب ج ب ج ج ا ب ج ا ج ج ب ا ب ب د ب ب ب ب ج ج ج د ب د ب ب ج ا ب د ب د ا'.split(' '),
+  5: 'ا د ج د ب ج ب ب ب ب ج ب ا د ج د ج ا ا ب ا ب ا ا ج د ج ج د ب ج ج ج ب ب د ج ب ب ب ب ب ج ج ب ا ب ب ج ب د ا ج ج ا'.split(' '),
+  6: 'ب د ج ا ا ب ب د ا ب ب ج د د ج ب ا ب ج ج ج د ب ا ب ج ا ب ب ا ب ب ا ب ا ب ب ج د ب ب ب ب ب ج ب ا ا ج ا ج ا ج ج ا'.split(' '),
+  7: 'ا ا ج ب ج ج ج ا ج ا د ج ب ا د ا ج ا د ا ب ج د ا ب ج ب ا ج ب ج ج ا ا ب د د ب ج ج د ا ب د ب د ا ب د ج ج ج ا د ب'.split(' '),
+  8: 'ج ب ب د ب ا ا ا د د ا ا ا ا د ب ا ج د د ج د ج ا ج ب ج ج د ب ج ا ا ا ب ب ا ب ب ا ج ا ب ب ا ج ا ج ب ا ج ا ا د ج'.split(' '),
+  9: 'ب ب ج ب ج ا ا د ا د ج ج ا ب ج ا ج د ب ب ب ج ج ب د ب ا ج ا ب ج ج ا ب ا ج ب د د ب ج د ا ب ا د د ا ا ج د د ا ب ا'.split(' '),
+  10: 'ب ب ج د ج ا د ج ب ب د ا ج ا ب ج ا ب ج د ا ج ج ا د ج ج ا د د د ج ب ب ا د د د ب ا د ا ب د ج د ب ج ج ب ا ب ا ج ج'.split(' ')
+}
+const MODEL_QUESTION_COUNTS: Record<number, number> = { 2: 55, 3: 54, 4: 54, 5: 55, 6: 55, 7: 55, 8: 55, 9: 55, 10: 55 }
+const MODEL_PNG_QUESTION_NUMBERS: Record<number, readonly number[]> = { 4: [54], 5: [37], 9: [49, 53], 10: [12] }
+
+function getAnswerIndex(answer: string) {
+  switch (answer) {
+    case 'ا':
+    case 'أ': return 0
+    case 'ب': return 1
+    case 'ج': return 2
+    case 'د': return 3
+    default: throw new Error(`Unknown answer key: ${answer}`)
+  }
+}
 
 const models = [
-  { id: 1, title: 'الزبدة', subject: 'القدرات العامة والتحصيلي', questions: 55, duration: 25, description: 'تدريب شامل على أهم المهارات.' }
+  { id: 1, title: 'الزبدة 1', subject: 'القدرات العامة والتحصيلي', questions: 55, duration: 25, description: 'تدريب شامل على أهم المهارات.' },
+  ...Object.entries(MODEL_QUESTION_COUNTS).map(([id, questions]) => ({
+    id: Number(id),
+    title: `الزبدة ${id}`,
+    subject: 'القدرات العامة والتحصيلي',
+    questions,
+    duration: 25,
+    description: id === '3'
+      ? 'النموذج الثالث؛ تتوفر حاليًا صور 54 سؤالًا.'
+      : `النموذج ${id} من نماذج الزبدة.`
+  }))
 ]
 
 const quantQuestions: QuestionItem[] = [
@@ -25,8 +59,30 @@ const quantQuestions: QuestionItem[] = [
   }))
 ]
 
-const questionBanks: Record<number, typeof quantQuestions> = {
-  1: quantQuestions
+function createModelQuestions(modelId: number): QuestionItem[] {
+  const answerKeys = MODEL_ANSWER_KEYS[modelId]
+  const questionCount = MODEL_QUESTION_COUNTS[modelId]
+  if (!answerKeys || !questionCount || answerKeys.length < questionCount) {
+    throw new Error(`Missing question or answer data for model ${modelId}`)
+  }
+
+  const pngQuestionNumbers = MODEL_PNG_QUESTION_NUMBERS[modelId] || []
+  return Array.from({ length: questionCount }, (_, questionIndex) => {
+    const questionNumber = questionIndex + 1
+    const extension = pngQuestionNumbers.includes(questionNumber) ? 'png' : 'jpg'
+    return {
+      text: '',
+      options: ['', '', '', ''],
+      correct: getAnswerIndex(answerKeys[questionIndex]),
+      explanation: '',
+      imageUrl: `${import.meta.env.BASE_URL}zobda${modelId}-questions/question-${String(questionNumber).padStart(2, '0')}.${extension}`
+    }
+  })
+}
+
+const questionBanks: Record<number, QuestionItem[]> = {
+  1: quantQuestions,
+  ...Object.fromEntries(Object.keys(MODEL_QUESTION_COUNTS).map(id => [Number(id), createModelQuestions(Number(id))]))
 }
 
 const TEACHER_EMAIL = 'ahmed@gmail.com'
@@ -529,7 +585,7 @@ function Topbar({ showBack = false }: { showBack?: boolean }) {
 function Sidebar() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
-  const items = [['الرئيسية', '/dashboard', Home], ['الاختبارات', '/tests', BookOpen], ['زبدة', '/summaries', FileText], ['نتائجى', '/results', BarChart3], ['المفضلة', '/favorites', Bookmark], ['الملف الشخصي', '/profile', UserRound]]
+  const items = [['الرئيسية', '/dashboard', Home], ['الاختبارات', '/tests', BookOpen], ['الزبدة', '/summaries', FileText], ['نتائجى', '/results', BarChart3], ['المفضلة', '/favorites', Bookmark], ['الملف الشخصي', '/profile', UserRound]]
 
   return <>
     <button className="mobile-menu" onClick={() => setOpen(!open)} aria-label="القائمة"><Menu/></button>
@@ -583,7 +639,7 @@ function Dashboard() {
   < div className = "progress-stats" > <h2>تقدمك العام </h2><div><span>النماذج المكتملة</span > <b>{ completedModels } </b></div > <div><span>الإجابات الصحيحة </span><b>{correctAnswers}</b > </div><div><span>معدل النجاح</span > <b>{ successRate } % </b></div > </div>
     </section>
 
-    < section className = "student-choosing" > <h2>اختر ما تريد البدء به </h2><div className="student-feature-grid"><button onClick={()=>navigate('/models')}><span className="feature-symbol"><ClipboardIcon/></span><strong>النماذج</strong><small>تدريب وحل اختبارات</small></button><button onClick={()=>navigate('/summaries')}><span className="feature-symbol"><BookOpen/></span><strong>زبدة</strong><small>ملخصات ومراجعات</small></button></div></section>
+    < section className = "student-choosing" > <h2>اختر ما تريد البدء به </h2><div className="student-feature-grid"><button onClick={()=>navigate('/models')}><span className="feature-symbol"><ClipboardIcon/></span><strong>النماذج</strong><small>تدريب وحل اختبارات</small></button><button onClick={()=>navigate('/summaries')}><span className="feature-symbol"><BookOpen/></span><strong>الزبدة</strong><small>ملخصات ومراجعات</small></button></div></section>
       </main>
       </AppShell>
 }
@@ -651,8 +707,8 @@ function Summaries() {
 
   const allModels: Model[] = [
     ...models,
-    ...remoteModels.filter(model => model.id !== 1),
-    ...custom.filter(model => model.id !== 1)
+    ...remoteModels.filter(model => !models.some(localModel => localModel.id === model.id)),
+    ...custom.filter(model => !models.some(localModel => localModel.id === model.id))
   ]
 
   return <AppShell title="زبدة" >
@@ -669,12 +725,12 @@ function Summaries() {
           <p>ملخصات تعليمية متاحة الآن</p>
         </div>
         <div className="summary-grid">
-          {allModels.filter(model => model.id !== 2).map(model => <article className="summary-card" key={model.id}>
+          {allModels.map(model => <article className="summary-card" key={model.id}>
             <div className="summary-card-head">
               <span>القدرات العامة والتحصيلي</span>
               <b>متاح الآن</b>
             </div>
-            <h2>الزبدة</h2>
+            <h2>{model.title}</h2>
             <p>{model.description}</p>
             <div className="summary-card-info">
               <span><FileText size={17}/>{model.questionItems?.length ?? model.questionCount ?? model.questions} سؤال</span>
@@ -699,7 +755,7 @@ function Exam() {
   const [remoteQuestions, setRemoteQuestions] = useState<QuestionItem[]>([])
   useEffect(() => {
     const client = supabase
-    if (!client || Number(id) === 2) return
+    if (!client) return
     client
       .from('models')
       .select('id,title,subject,description,question_count,duration')
@@ -709,7 +765,7 @@ function Exam() {
         if (!data) return
         setRemoteModel({
           id: data.id,
-          title: data.id === 1 ? 'الزبدة' : data.title,
+          title: data.id === 1 ? 'الزبدة 1' : data.title,
           subject: data.subject,
           questions: data.question_count,
           duration: data.duration,
@@ -733,12 +789,9 @@ function Exam() {
   }, [id])
 
   const activeModel = remoteModel || model
-  const sourceQuestions: QuestionItem[] = model.id === 1
-    ? quantQuestions
-    : remoteQuestions.length
-      ? remoteQuestions
-      : model.questionItems?.length ? model.questionItems : questionBanks[model.id] || quantQuestions
-  const examQuestions: QuestionItem[] = Array.from({ length: 55 }, (_, questionIndex) => {
+  const sourceQuestions: QuestionItem[] = questionBanks[model.id]
+    || (remoteQuestions.length ? remoteQuestions : model.questionItems?.length ? model.questionItems : quantQuestions)
+  const examQuestions: QuestionItem[] = Array.from({ length: questionBanks[model.id]?.length ?? 55 }, (_, questionIndex) => {
     const sourceQuestion = sourceQuestions[questionIndex]
     if (sourceQuestion) return sourceQuestion
     return {
@@ -804,8 +857,6 @@ function Exam() {
     }
   }, [isVideoModalOpen])
 
-  if (Number(id) === 2) return <Navigate to="/summaries" replace/>
-
   return <main className="exam-page">
     <header className="exam-top">
       <button type="button" className="exam-back" onClick={goBack} aria-label="رجوع"><ChevronRight size={24}/></button>
@@ -831,7 +882,7 @@ function Exam() {
       <section className="question-card">
         <div className={`question-prompt-layout ${currentQuestion.imageUrl ? (currentQuestion.text ? 'has-diagram' : 'has-diagram-only') : ''}`}>
           <h1>{currentQuestion.text}</h1>
-          {currentQuestion.imageUrl && <div className="question-diagram-wrap"><img className="question-diagram" src={currentQuestion.imageUrl} alt="رسم المثلث المظلل والمثلثين غير المظللين"/></div>}
+          {currentQuestion.imageUrl && <div className="question-diagram-wrap"><img className="question-diagram" src={currentQuestion.imageUrl} alt={`صورة السؤال ${index + 1}`}/></div>}
         </div>
         <div className="options">{currentQuestion.options.map((op, i) => <button key={i} className={answers[index] === i ? 'selected' : ''} onClick={() => setAnswers(a => a.map((v, n) => n === index ? i : v))}><b>{['أ', 'ب', 'ج', 'د'][i]}</b><span>{op}</span><i><CircleCheck size={17}/></i></button>)}</div>
         <div className="q-actions">
@@ -862,7 +913,11 @@ function Exam() {
           <strong>شرح السؤال {index + 1}</strong>
           <button type="button" onClick={closeVideo} aria-label="إغلاق الفيديو"><X size={22}/></button>
         </div>
-        <div className="video-modal-player">
+        <div
+          className="video-modal-player"
+          onContextMenu={event => event.preventDefault()}
+          onDragStart={event => event.preventDefault()}
+        >
           {currentQuestion.streamableEmbedUrl
             ? <iframe
               className="explanation-video"
@@ -890,6 +945,12 @@ function Exam() {
               disablePictureInPicture
               onContextMenu={event => event.preventDefault()}
             />}
+          <div className="video-watermark" aria-hidden="true">
+            <span>ELPROF • محتوى تعليمي</span>
+            <span>ELPROF • محتوى تعليمي</span>
+            <span>ELPROF • محتوى تعليمي</span>
+            <span>ELPROF • محتوى تعليمي</span>
+          </div>
         </div>
       </section>
     </div>}

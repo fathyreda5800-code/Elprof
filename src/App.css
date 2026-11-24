@@ -2543,11 +2543,32 @@
 }
 
 .video-modal-player {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 12px;
   background: #000;
+}
+
+.video-watermark {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: space-between;
+  justify-items: center;
+  padding: 8%;
+  color: rgba(255, 255, 255, .42);
+  font-size: clamp(12px, 2vw, 18px);
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}
+
+.video-watermark span:nth-child(even) {
+  justify-self: end;
 }
 
 .video-modal-player .explanation-video {
