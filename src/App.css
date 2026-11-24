@@ -2560,14 +2560,18 @@
   align-content: space-between;
   justify-items: center;
   padding: 8%;
-  color: rgba(255, 255, 255, .42);
-  font-size: clamp(12px, 2vw, 18px);
-  font-weight: 700;
   pointer-events: none;
   user-select: none;
 }
 
-.video-watermark span:nth-child(even) {
+.video-watermark img {
+  width: clamp(48px, 12%, 100px);
+  max-height: 100%;
+  object-fit: contain;
+  opacity: .38;
+}
+
+.video-watermark img:nth-child(even) {
   justify-self: end;
 }
 

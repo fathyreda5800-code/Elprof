@@ -958,10 +958,10 @@ function Exam() {
               onContextMenu={event => event.preventDefault()}
             />}
           <div className="video-watermark" aria-hidden="true">
-            <span>ELPROF • محتوى تعليمي</span>
-            <span>ELPROF • محتوى تعليمي</span>
-            <span>ELPROF • محتوى تعليمي</span>
-            <span>ELPROF • محتوى تعليمي</span>
+            <img src={`${import.meta.env.BASE_URL}elprof-brand.png`} alt=""/>
+            <img src={`${import.meta.env.BASE_URL}elprof-brand.png`} alt=""/>
+            <img src={`${import.meta.env.BASE_URL}elprof-brand.png`} alt=""/>
+            <img src={`${import.meta.env.BASE_URL}elprof-brand.png`} alt=""/>
           </div>
         </div>
       </section>
