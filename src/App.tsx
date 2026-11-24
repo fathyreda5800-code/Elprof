@@ -6,7 +6,8 @@ import './App.css'
 
 type QuestionItem = { text: string; options: string[]; correct: number; explanation: string; imageUrl?: string; videoUrl?: string; streamableEmbedUrl?: string }
 
-const FIRST_QUESTION_VIDEO_URL = 'https://www.youtube.com/embed/l7KULa8AeEU'
+const STREAMABLE_FIRST_QUESTION_URL = 'https://streamable.com/e/t3fsna?autoplay=1&loop=0'
+const QUESTION_2_VIDEO_URL = 'https://www.youtube.com/embed/l7KULa8AeEU'
 const SUMMARY_ANSWER_KEYS = ['ا', 'ب', 'ج', 'ج', 'ب', 'ب', 'ج', 'ب', 'ج', 'ب', 'ا', 'ب', 'ب', 'د', 'د', 'ا', 'د', 'ب', 'ج', 'د', 'ج', 'ب', 'د', 'ا', 'ب', 'د', 'د', 'د', 'د', 'ب', 'ج', 'ب', 'ا', 'د', 'ج', 'د', 'د', 'ب', 'ج', 'ب', 'ب', 'ج', 'د', 'ا', 'ا', 'ا', 'ج', 'ب', 'ا', 'د', 'ج', 'ج', 'ب', 'ب', 'ج']
 const SUMMARY_CORRECT_INDEXES = SUMMARY_ANSWER_KEYS.map(answer => ['ا', 'ب', 'ج', 'د'].indexOf(answer))
 const MODEL_ANSWER_KEYS: Record<number, readonly string[]> = {
@@ -55,7 +56,9 @@ const quantQuestions: QuestionItem[] = [
     correct: SUMMARY_CORRECT_INDEXES[questionIndex],
     explanation: '',
     imageUrl: `${import.meta.env.BASE_URL}zobda-questions/question-${String(questionIndex + 1).padStart(2, '0')}.jpg`,
-    ...(questionIndex === 0 ? { videoUrl: FIRST_QUESTION_VIDEO_URL } : {})
+    ...(questionIndex === 0
+      ? { streamableEmbedUrl: STREAMABLE_FIRST_QUESTION_URL }
+      : questionIndex === 1 ? { videoUrl: QUESTION_2_VIDEO_URL } : {})
   }))
 ]
 
