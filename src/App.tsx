@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type InvalidEvent } from 'react'
-import { BrowserRouter, Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { BarChart3, BookOpen, Bookmark, ChevronLeft, ChevronRight, CircleCheck, Clock3, Eye, EyeOff, FileText, Home, LockKeyhole, LogOut, Menu, Play, Star, Target, UserRound, X } from 'lucide-react'
 import { supabase } from './lib/supabase'
 import './App.css'
@@ -198,6 +198,11 @@ function Welcome() { const navigate = useNavigate(); return <main className="wel
 
 function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const requestedPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
+  const returnPath = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
+    ? requestedPath
+    : '/dashboard'
   const goBack = useGoBack('/')
   const [show, setShow] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -292,14 +297,14 @@ function AuthPage({ mode }: { mode: 'login' | 'register' }) {
       if (role === 'teacher' && data.user.email?.toLowerCase() === TEACHER_EMAIL) {
         localStorage.removeItem('elprof_student_name')
         localStorage.setItem('elprof_teacher_name', accountName)
-        navigate('/dashboard')
+        navigate(returnPath, { replace: true })
         return
       }
 
       localStorage.removeItem('elprof_teacher_name')
       localStorage.setItem('elprof_student_name', accountName)
       localStorage.setItem('elprof_role', 'student')
-      navigate('/dashboard')
+      navigate(returnPath, { replace: true })
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'تعذر الاتصال بخدمة الحسابات.')
     } finally {
@@ -586,8 +591,25 @@ function Topbar({ showBack = false }: { showBack?: boolean }) {
 
 function Sidebar() {
   const [open, setOpen] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
   const navigate = useNavigate()
   const items = [['الرئيسية', '/dashboard', Home], ['الاختبارات', '/tests', BookOpen], ['الزبدة', '/summaries', FileText], ['نتائجى', '/results', BarChart3], ['المفضلة', '/favorites', Bookmark], ['الملف الشخصي', '/profile', UserRound]]
+  const logout = async () => {
+    setLogoutError('')
+    try {
+      if (supabase) {
+        const { error } = await supabase.auth.signOut()
+        if (error) throw error
+      }
+      localStorage.removeItem('elprof_role')
+      localStorage.removeItem('elprof_student_name')
+      localStorage.removeItem('elprof_teacher_name')
+      navigate('/login', { replace: true })
+    } catch (error) {
+      console.error('Unable to sign out.', error)
+      setLogoutError('تعذر تسجيل الخروج. حاول مرة أخرى.')
+    }
+  }
 
   return <>
     <button className="mobile-menu" onClick={() => setOpen(!open)} aria-label="القائمة"><Menu/></button>
@@ -600,9 +622,77 @@ function Sidebar() {
             <Icon size={20}/><span>{label}</span>
           </NavLink>)}
       </nav>
-      <button className="logout" onClick={() => { localStorage.removeItem('elprof_role'); navigate('/') }}><LogOut size={19}/>تسجيل الخروج</button>
+      {logoutError && <p className="notice error" role="alert">{logoutError}</p>}
+      <button className="logout" onClick={() => { void logout() }}><LogOut size={19}/>تسجيل الخروج</button>
     </aside>
   </>
+}
+
+function RequireAuth() {
+  const location = useLocation()
+  const [status, setStatus] = useState<'checking' | 'authenticated' | 'unauthenticated' | 'error'>(() => supabase ? 'checking' : 'error')
+  const [errorMessage, setErrorMessage] = useState(() => supabase ? '' : 'خدمة الحسابات غير متاحة حاليًا. تحقق من إعدادات Supabase.')
+
+  useEffect(() => {
+    if (!supabase) return
+
+    const client = supabase
+    let active = true
+    const verifySession = async () => {
+      try {
+        const { data: { session }, error: sessionError } = await client.auth.getSession()
+        if (sessionError) throw sessionError
+        if (!session) {
+          if (active) setStatus('unauthenticated')
+          return
+        }
+
+        const { data: { user }, error: userError } = await client.auth.getUser()
+        if (userError) {
+          if (userError.status === 401 || userError.name === 'AuthSessionMissingError') {
+            if (active) setStatus('unauthenticated')
+            return
+          }
+          throw userError
+        }
+        if (active) setStatus(user ? 'authenticated' : 'unauthenticated')
+      } catch (error) {
+        console.error('Unable to verify the current user.', error)
+        if (active) {
+          setErrorMessage('تعذر التحقق من تسجيل الدخول. تحقق من اتصالك وحاول مرة أخرى.')
+          setStatus('error')
+        }
+      }
+    }
+
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+      if (!active || event === 'INITIAL_SESSION') return
+      setStatus(session ? 'authenticated' : 'unauthenticated')
+    })
+    void verifySession()
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  if (status === 'checking') {
+    return <main className="auth-page"><section className="auth-card"><p role="status">جارٍ التحقق من تسجيل الدخول...</p></section></main>
+  }
+  if (status === 'unauthenticated') {
+    return <Navigate to="/login" replace state={{ from: location }}/>
+  }
+  if (status === 'error') {
+    return <main className="auth-page">
+      <section className="auth-card">
+        <h1>تعذر التحقق من الحساب</h1>
+        <p className="notice error" role="alert">{errorMessage}</p>
+        <button type="button" className="btn primary full" onClick={() => window.location.reload()}>إعادة المحاولة</button>
+      </section>
+    </main>
+  }
+  return <Outlet/>
 }
 
 function AppShell({ children, hideSidebar = false }: { title: string; children: any; hideSidebar?: boolean }) {
@@ -1291,19 +1381,21 @@ export default function App() {
       <Route path="/verify-email" element={<ResetCode/>}/>
       <Route path="/reset-code" element={<ResetCode/>}/>
       <Route path="/reset-password" element={<ResetPassword/>}/>
-      <Route path="/dashboard" element={<Dashboard/>}/>
-      <Route path="/models" element={<Models/>}/>
-      <Route path="/tests" element={<Tests/>}/>
-      <Route path="/summaries" element={<Summaries/>}/>
-      <Route path="/exam/:id" element={<Exam/>}/>
-      <Route path="/results" element={<Results/>}/>
-      <Route path="/review" element={<Review/>}/>
-      <Route path="/profile" element={<Profile/>}/>
-      <Route path="/teacher/students" element={<TeacherStudents/>}/>
-      <Route path="/favorites" element={<Favorites/>}/>
-      <Route path="/admin" element={<Navigate to="/dashboard" replace/>}/>
-      <Route path="/admin/*" element={<Navigate to="/dashboard" replace/>}/>
-      <Route path="*" element={<Dashboard/>}/>
+      <Route element={<RequireAuth/>}>
+        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/models" element={<Models/>}/>
+        <Route path="/tests" element={<Tests/>}/>
+        <Route path="/summaries" element={<Summaries/>}/>
+        <Route path="/exam/:id" element={<Exam/>}/>
+        <Route path="/results" element={<Results/>}/>
+        <Route path="/review" element={<Review/>}/>
+        <Route path="/profile" element={<Profile/>}/>
+        <Route path="/teacher/students" element={<TeacherStudents/>}/>
+        <Route path="/favorites" element={<Favorites/>}/>
+        <Route path="/admin" element={<Navigate to="/dashboard" replace/>}/>
+        <Route path="/admin/*" element={<Navigate to="/dashboard" replace/>}/>
+        <Route path="*" element={<Dashboard/>}/>
+      </Route>
     </Routes>
   </BrowserRouter>
 }
