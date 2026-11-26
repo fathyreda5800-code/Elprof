@@ -198,11 +198,6 @@ function Welcome() { const navigate = useNavigate(); return <main className="wel
 
 function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate()
-  const location = useLocation()
-  const requestedPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
-  const returnPath = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
-    ? requestedPath
-    : '/dashboard'
   const goBack = useGoBack('/')
   const [show, setShow] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -297,14 +292,14 @@ function AuthPage({ mode }: { mode: 'login' | 'register' }) {
       if (role === 'teacher' && data.user.email?.toLowerCase() === TEACHER_EMAIL) {
         localStorage.removeItem('elprof_student_name')
         localStorage.setItem('elprof_teacher_name', accountName)
-        navigate(returnPath, { replace: true })
+        navigate('/dashboard', { replace: true })
         return
       }
 
       localStorage.removeItem('elprof_teacher_name')
       localStorage.setItem('elprof_student_name', accountName)
       localStorage.setItem('elprof_role', 'student')
-      navigate(returnPath, { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'تعذر الاتصال بخدمة الحسابات.')
     } finally {
