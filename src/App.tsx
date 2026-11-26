@@ -76,7 +76,8 @@ function createModelQuestions(modelId: number): QuestionItem[] {
       options: ['', '', '', ''],
       correct: getAnswerIndex(answerKeys[questionIndex]),
       explanation: '',
-      imageUrl: `${import.meta.env.BASE_URL}zobda${modelId}-questions/question-${String(questionNumber).padStart(2, '0')}.${extension}`
+      imageUrl: `${import.meta.env.BASE_URL}zobda${modelId}-questions/question-${String(questionNumber).padStart(2, '0')}.${extension}`,
+      ...(modelId === 2 ? { localVideoUrl: `${import.meta.env.BASE_URL}zobda2-videos/${questionNumber}.mp4` } : {})
     }
   })
 }
